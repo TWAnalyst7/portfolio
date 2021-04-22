@@ -1,0 +1,25 @@
+with v as
+(
+    select * from 
+    (
+       select
+     
+       파티ID, 캐릭터class,
+	     캐릭터ID, 대미지,
+       sum(대미지) over (partition by 파티ID) as 파티 총대미지,
+       cast(count(*) over (partition by 파티ID) AS REAL) as 파티인원
+ 
+       from 던전 테이블 and 던전클리어
+       where 날짜 
+    )
+)
+ 
+ 
+select
+ 
+캐릭터class, 
+count(*) as 카운트,
+avg(case when 대미지 > 0 then 파티인원 * 대미지 / 파티 총대미지 else 0 end) as 점수
+ 
+from v
+group by 캐릭터class
