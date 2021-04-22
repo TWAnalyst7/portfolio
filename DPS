@@ -1,0 +1,34 @@
+## 캐릭터별 DPS 데이터 추출 
+
+
+select * FROM
+(
+    select
+    *,
+    ROW_NUMBER() OVER (PARTITION BY class ORDER BY DPS DESC) as 캐릭터순위
+    FROM
+    (
+        select
+        *, ROW_NUMBER() OVER (PARTITION BY 캐릭터 Id ORDER BY DPS DESC) as 유저순위
+    	  from
+    	  (
+          select
+          *, 총대미지/플레이타임 as DPS
+          from
+          (
+            	 select
+            	 class, 유저Id, 캐릭터Id, 캐릭터Name,
+            	 무기Grade, 무기ID, 무기ETC,총대미지, 플레이타임
+ 
+            	 from TableName cross join unnest(장착무기array)
+            	 as nested_data
+            	 (
+                장작한 무기 목록...
+            	 )
+            	where 시간 and npsn is not null and 장착아이템 설정 and 던전 설정
+          )
+    	)
+   )
+	where 유저순위 = 1 and 장착무기array = 기준이되는 무기설정
+)R4
+where 캐릭터순위 <= 50
