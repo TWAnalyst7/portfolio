@@ -1,0 +1,78 @@
+with
+BEFORE as
+(
+    SELECT * FROM
+    (
+        SELECT
+        *, ROW_NUMBER() OVER (PARTITION BY class ORDER BY DPS DESC) as CLASS_Ranking, 'before' as period
+        FROM
+        (
+            select
+            *, ROW_NUMBER() OVER (PARTITION BY 캐릭터 ID ORDER BY DPS DESC) as USER_Ranking
+            from
+            (
+                select
+                *, 총대미지/ 플레이시간 as DPS
+                from
+                (
+                    select
+			class, 캐릭터ID, 캐릭터 이름, 총대미지, 총 플레이시간
+  
+                    from 테이블
+  
+                    where 날짜지정(업데이트 전) and  던전 설정 and 클리어조건 
+                )
+            )
+        )
+        where USER_Ranking = 1
+    )
+)
+  
+,
+  
+AFTER as
+(
+    select * FROM  
+    (
+        select
+        *, ROW_NUMBER() OVER (PARTITION BY class ORDER BY DPS DESC) as CLASS_Ranking, 'after' as period
+        from
+        (
+            select
+            *, ROW_NUMBER() OVER (PARTITION BY 캐릭터ID ORDER BY DPS DESC) as USER_Ranking
+            from
+            (
+                select
+                *, totaldamage/totalplayseconds as DPS
+                from
+                (
+                    select
+                   	class, 캐릭터ID, 캐릭터 이름, 총대미지, 총 플레이시간
+
+                    from 테이블
+ 
+                    where 날짜지정(업데이트 후) and  던전 설정 and 클리어조건 
+                )
+            )
+        )
+        where USER_Ranking = 1
+    )
+)
+  
+  
+SELECT
+class, DPSratio
+FROM
+(
+    select class, ADPS/BDPS as DPSratio
+    from
+    (
+        SELECT
+        A.class,
+        cast(A.DPS AS REAL) as ADPS, cast(B.DPS AS REAL) as BDPS
+        FROM BEFORE as B INNER JOIN AFTER as A
+        ON A.캐릭터ID=B.캐릭터ID
+    )
+)
+
+
