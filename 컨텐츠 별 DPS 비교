@@ -1,0 +1,58 @@
+with
+컨텐츠A as
+(
+    SELECT
+ 
+    캐릭터ID, 컨텐츠A DPS,
+    '컨텐츠A’ as 던전
+ 
+    FROM
+    (
+       select
+       *, 대미지/플레이시간 as 컨텐츠A DPS,
+       ROW_NUMBER() OVER (PARTITION BY 캐릭터ID 
+                          ORDER BY [컨텐츠A DPS] DESC) as USER_Ranking
+        from
+        (
+            select
+            캐릭터class, 캐릭터ID,
+            대미지, 플레이시간
+            
+		from 던전테이블
+            where 날짜 and 던전설졍
+        )
+    )
+    where USER_Ranking = 1
+),
+ 
+ 
+ 
+컨텐츠B as
+(
+    SELECT
+ 
+    캐릭터ID, 컨텐츠A DPS,
+    '컨텐츠B’ as 던전
+ 
+    FROM
+    (
+        select
+        *, 대미지/플레이시간 as 컨텐츠B DPS,
+        ROW_NUMBER() OVER (PARTITION BY 캐릭터ID 
+                           ORDER BY [컨텐츠B DPS] DESC) as USER_Ranking
+        from
+        (
+            select
+            캐릭터class, 캐릭터ID,
+            대미지, 플레이시간
+ 
+            from 던전테이블
+            where 날짜 and 던전설졍
+        )
+    )
+where USER_Ranking = 1
+)
+ 
+ 
+ 
+select * FROM 컨텐츠A inner join 컨텐츠B ON 컨텐츠A.캐릭터ID=컨텐츠B.캐릭터ID
